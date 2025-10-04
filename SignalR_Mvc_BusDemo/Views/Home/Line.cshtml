@@ -37,10 +37,28 @@
         });
         connection.on('ForceDisconnect', () => {
             console.log('ForceDisconnect received');
+            alertDisconnected();
             connection.stop();
         });
     }
 
+    function alertDisconnected(){
+        const cardBody = document.querySelector('.card-body');
+
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'forceDisconnectAlert';
+        alertDiv.className = 'alert alert-warning d-flex justify-content-between align-items-center mt-3';
+        alertDiv.innerHTML = `
+            <span>⚠️ You were disconnected from the server.</span>
+            <button id="btnRefresh" class="btn btn-sm btn-primary">Refresh</button>
+        `;
+
+        cardBody.appendChild(alertDiv);
+
+        document.getElementById('btnRefresh').addEventListener('click', () => {
+            location.reload();
+        });
+    }
     async function connect() {
         if (!connection) buildConnection();
         if (connection.state === 'Connected') return;
@@ -52,6 +70,7 @@
         if (connection && connection.state !== 'Disconnected') {
             await connection.stop();
             console.log('Disconnected');
+            alertDisconnected();
         }
     }
 

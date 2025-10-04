@@ -1,12 +1,11 @@
 ﻿using System.Collections.Concurrent;
 
-namespace SignalR_Mvc_BusDemo.Services
+namespace SignalRDemo.Services;
+
+public class GroupControl
 {
-    public class GroupControl
-    {
-        private readonly ConcurrentDictionary<string, bool> _paused = new();
-        public void Pause(string group) => this._paused[group] = true;
-        public void Resume(string group) => this._paused[group] = false;
-        public bool IsPaused(string group) => this._paused.TryGetValue(group, out var v) && v;
-    }
+    private readonly ConcurrentDictionary<string, bool> _paused = new();
+    public void Pause(string group) => _paused[group] = true;
+    public void Resume(string group) => _paused[group] = false;
+    public bool IsPaused(string group) => _paused.TryGetValue(group, out var v) && v;
 }

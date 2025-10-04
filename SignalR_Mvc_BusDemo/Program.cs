@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SignalR_Mvc_BusDemo.Hubs;
-using SignalR_Mvc_BusDemo.Services;
-using SignalR_Mvc_BusDemo.Utilities;
+using SignalRDemo.Hubs;
+using SignalRDemo.Services;
+using SignalRDemo.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
