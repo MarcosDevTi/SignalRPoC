@@ -4,7 +4,7 @@ namespace SignalRDemo.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index() => RedirectToAction("Line", new { id = 1 });
+    public IActionResult Index() => RedirectToAction("Dashboard");
 
     public IActionResult Line(int id)
     {

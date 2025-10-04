@@ -3,48 +3,46 @@
     var group = (string)ViewData["Group"];
     var title = (string)ViewData["Title"];
 }
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="m-0">@title</h2>
+    <div> <h2 class="m-0">@title</h2> <p id="connectionId"></p> </div>
     <div class="btn-group">
         <button id="btnConnect" class="btn btn-success btn-sm">Connect</button>
         <button id="btnDisconnect" class="btn btn-outline-danger btn-sm">Disconnect</button>
-        <button id="btnJoin" class="btn btn-primary btn-sm">Join Group</button>
-        <button id="btnLeave" class="btn btn-outline-secondary btn-sm">Leave Group</button>
     </div>
-</div>
-<div class="card shadow-sm">
-    <div class="card-body">
-        <p class="text-muted">Current stop: <span id="stop">0</span> / <span id="total">0</span></p>
-        <div class="progress mb-2" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-            <div id="progressBar" class="progress-bar" style="width:0%">0%</div>
-        </div>
-    </div>
-</div>
-<script>
-    const groupName = '@group';
-    let connection = null;
 
+</div>
+<div class="card shadow-sm"> <div class="card-body"> <p class="text-muted">Current stop: <span id="stop">0</span> / <span id="total">0</span></p> <div class="progress mb-2" role="progressbar" aria-valuemin="0" aria-valuemax="100"> <div id="progressBar" class="progress-bar" style="width:0%">0%</div> </div> </div> </div>
+<script>     const groupName = '@group'; let connection = null;
     function buildConnection() {
         connection = new signalR.HubConnectionBuilder().withUrl('/bushub').build();
+
         connection.on('BusProgress', (msg) => {
             if (msg.group === groupName) {
-                console.log('BusProgress update:', msg);
                 document.getElementById('stop').textContent = msg.stopNumber;
                 document.getElementById('total').textContent = msg.totalStops;
                 document.getElementById('progressBar').style.width = msg.progressPercent + '%';
                 document.getElementById('progressBar').textContent = Math.round(msg.progressPercent) + '%';
             }
         });
+
         connection.on('ForceDisconnect', () => {
-            console.log('ForceDisconnect received');
             alertDisconnected();
             connection.stop();
         });
+
+        connection.onreconnected(id => {
+            showConnectionId(id);
+        });
+    }
+
+    function showConnectionId(id) {
+        document.getElementById('connectionId').textContent = `Connection ID: ${id}`;
     }
 
     function alertDisconnected(){
         const cardBody = document.querySelector('.card-body');
-
+        if (document.getElementById('forceDisconnectAlert')) return;
         const alertDiv = document.createElement('div');
         alertDiv.id = 'forceDisconnectAlert';
         alertDiv.className = 'alert alert-warning d-flex justify-content-between align-items-center mt-3';
@@ -52,44 +50,46 @@
             <span>⚠️ You were disconnected from the server.</span>
             <button id="btnRefresh" class="btn btn-sm btn-primary">Refresh</button>
         `;
-
         cardBody.appendChild(alertDiv);
-
         document.getElementById('btnRefresh').addEventListener('click', () => {
             location.reload();
         });
     }
+
+    async function loadCurrentIfAvailable() {
+        try {
+            const current = await connection.invoke('GetCurrent', groupName);
+            if (current && current.group === groupName) {
+                document.getElementById('stop').textContent = current.stopNumber;
+                document.getElementById('total').textContent = current.totalStops;
+                document.getElementById('progressBar').style.width = current.progressPercent + '%';
+                document.getElementById('progressBar').textContent = Math.round(current.progressPercent) + '%';
+            }
+        } catch {}
+    }
+
     async function connect() {
         if (!connection) buildConnection();
         if (connection.state === 'Connected') return;
         await connection.start();
-        console.log('Connected');
+        showConnectionId(connection.connectionId);
     }
 
     async function disconnect() {
         if (connection && connection.state !== 'Disconnected') {
             await connection.stop();
-            console.log('Disconnected');
             alertDisconnected();
+            document.getElementById('connectionId').textContent = '';
         }
     }
 
-    document.getElementById('btnConnect').addEventListener('click', async () => { await connect(); });
+    document.getElementById('btnConnect').addEventListener('click', async () => { await connect(); await connection.invoke('JoinGroup', groupName); await loadCurrentIfAvailable(); });
     document.getElementById('btnDisconnect').addEventListener('click', async () => { await disconnect(); });
-    document.getElementById('btnJoin').addEventListener('click', async () => {
-        await connect();
-        await connection.invoke('JoinGroup', groupName);
-        console.log('Joined', groupName);
-    });
-    document.getElementById('btnLeave').addEventListener('click', async () => {
-        if (connection && connection.state === 'Connected') {
-            await connection.invoke('LeaveGroup', groupName);
-            console.log('Left', groupName);
-        }
-    });
 
     (async () => {
         await connect();
         await connection.invoke('JoinGroup', groupName);
+        await loadCurrentIfAvailable();
     })();
+
 </script>

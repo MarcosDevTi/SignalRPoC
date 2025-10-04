@@ -20,6 +20,8 @@ public class BusStateStore
         });
     }
 
+    public bool TryGet(string group, out BusProgress? progress) => _states.TryGetValue(group, out progress);
+
     public void Update(BusProgress p)
     {
         p.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -27,4 +29,6 @@ public class BusStateStore
     }
 
     public IEnumerable<BusProgress> GetAll() => _states.Values.OrderBy(v => v.Title);
+
+
 }
