@@ -1,4 +1,4 @@
-# README.fr.md — Documentation du projet SignalR Bus Demo
+# README.fr.md — SignalR Demo
 
 ## 🚍 Démonstration SignalR – Suivi en temps réel des autobus (.NET 8 MVC)
 
