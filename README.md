@@ -1,6 +1,6 @@
 # README.fr.md — SignalR Demo
 
-## 🚍 Démonstration SignalR – Suivi en temps réel des autobus (.NET 8 MVC)
+## 🚍Temps réel des autobus (.NET 8 MVC)
 
 Cette application illustre comment utiliser **SignalR** avec **ASP.NET Core MVC** pour diffuser en temps réel l’avancement de plusieurs autobus sur différentes lignes. Le projet sert de base pour comprendre les concepts d’abonnement aux groupes, de mise à jour en direct et de tableau de bord d’administration.
 
